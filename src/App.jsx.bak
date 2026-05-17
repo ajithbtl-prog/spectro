@@ -51,9 +51,9 @@ function calcSoil(v) {
   const ec=Math.max(0.1,Math.min(6,((v[15]-v[17])/(v[15]+v[17]+1))*3+1.8));
   const ndmi=(nir-vis)/(nir+vis+1);
   const nirRatio=nir/(vis+1);
-  const N=Math.round(Math.max(20,Math.min(350,200-(moisture*0.7)+(om*14))));
-  const P=Math.round(Math.max(10,Math.min(160,(v[8]/4095)*100+30)));
-  const K=Math.round(Math.max(30,Math.min(280,(v[10]/4095)*110+80)));
+const N=Math.round(Math.max(20,Math.min(350,200-(moisture*0.7)+(om*14))));
+const P=Math.round(Math.max(10,Math.min(160,(v[8]/4095)*100+30)));
+const K=Math.round(Math.max(30,Math.min(280,(v[10]/4095)*110+80)));
   const score=Math.round(Math.min(98,Math.max(8,(om/10)*35+(1-Math.abs(moisture-42)/42)*30+(N/350)*20+(K/280)*15)));
   let soilType="Mixed Mineral",soilConf=60;
   if(nirRatio>2.5&&om>4){soilType="Loamy / Rich";soilConf=82;}
