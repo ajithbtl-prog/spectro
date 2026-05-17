@@ -190,14 +190,24 @@ confidence
 // SMART NPK ESTIMATION
 // ─────────────────────────────────────────────────────────────
 
-function computeSmartNPK(){
+const NPK_MAX = { N: 500, P: 300, K: 400 };
 
-  console.log("TEST FUNCTION RUNNING");
+function computeSmartNPK(adc) {
+  if (!adc || adc.every(v => v === 0)) return { N: 0, P: 0, K: 0 };
+
+  const simN     = cosineSim(adc, REFS.nitrogen);
+  const simP     = cosineSim(adc, REFS.phosphorus);
+  const simK     = cosineSim(adc, REFS.potassium);
+  const simAir   = cosineSim(adc, REFS.air);
+  const simWater = cosineSim(adc, REFS.water);
+
+  const fluidSim = Math.max(simAir, simWater);
+  const scale    = Math.max(0, 1 - fluidSim);
 
   return {
-    N:111,
-    P:222,
-    K:333
+    N: Math.round(simN * NPK_MAX.N * scale),
+    P: Math.round(simP * NPK_MAX.P * scale),
+    K: Math.round(simK * NPK_MAX.K * scale),
   };
 }
 
