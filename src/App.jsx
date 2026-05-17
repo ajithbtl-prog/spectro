@@ -190,67 +190,14 @@ confidence
 // SMART NPK ESTIMATION
 // ─────────────────────────────────────────────────────────────
 
-function computeSmartNPK(adc, refs) {
+function computeSmartNPK(){
 
-  // no signal
-  if (!adc || adc.every(v => v === 0)) {
-    return { N:0, P:0, K:0 };
-  }
-
-  // similarity scores
-  const sim = {};
-
-  Object.entries(refs).forEach(([k,v])=>{
-    sim[k] = cosineSim(adc,v);
-  });
-
-  console.log("Similarity:", sim);
-
-  // convert to %
-  const nScore = (sim.nitrogen || 0) * 100;
-  const pScore = (sim.phosphorus || 0) * 100;
-  const kScore = (sim.potassium || 0) * 100;
-  const fScore = (sim.fertiliser || 0) * 100;
-
-  // dynamic ppm estimation
-  let N = Math.round(
-    (nScore * 4) +
-    (fScore * 1.5)
-  );
-
-  let P = Math.round(
-    (pScore * 3) +
-    (fScore * 1.2)
-  );
-
-  let K = Math.round(
-    (kScore * 3.5) +
-    (fScore * 1.3)
-  );
-
-  // AIR suppression
-  if(sim.air > 0.95){
-    N = 0;
-    P = 0;
-    K = 0;
-  }
-
-  // WATER suppression
-  if(sim.water > 0.95){
-    N *= 0.1;
-    P *= 0.1;
-    K *= 0.1;
-  }
-
-  // clamp
-  N = Math.min(999, Math.max(0,N));
-  P = Math.min(999, Math.max(0,P));
-  K = Math.min(999, Math.max(0,K));
+  console.log("TEST FUNCTION RUNNING");
 
   return {
-    N,
-    P,
-    K
+    N:111,
+    P:222,
+    K:333
   };
 }
 
