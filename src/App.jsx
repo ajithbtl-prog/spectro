@@ -33,6 +33,9 @@ const REFS = {
   air:        [1478,1058,2091, 985,1213,1409,1326,1473, 940, 248, 165,  70,1165, 373, 132, 100, 220, 718],
   water:      [1835,1231,2454,1208,1554,1838,1590,1857,1034, 314, 195,  79,1669, 469, 172, 126, 309, 928],
   fertiliser: [1541, 975,1893, 847, 884,1271,1270,1212, 853, 229, 157,  68,1242, 329, 123,  99, 203, 772],
+  nitrogen:   [ 544, 322, 831, 390, 547, 745, 701, 828, 590, 195, 209,  62, 805, 307, 120,  90, 183, 717],
+  phosphorus: [1056, 504,1312, 381, 488, 666, 597, 670, 503, 152, 166,  60, 565, 235,  91,  70, 128, 486],
+  potassium:  [ 960, 421,1082, 278, 311, 394, 307, 344, 311,  74,  85,  52, 269, 109,  50,  42,  52, 142],
 };
 const REF_META = {
   air:        { label:"Air",        emoji:"🌬",  desc:"Empty / Air baseline",   col:"#94a3b8", hint:"No liquid present. Sensor reading ambient environment." },
@@ -51,8 +54,10 @@ function computeSmartNPK(adc){
   const simK=cosineSim_norm(adc,REFS.potassium);
   const simAir=cosineSim_norm(adc,REFS.air);
   const simWater=cosineSim_norm(adc,REFS.water);
+  const simNutrient=Math.max(simN,simP,simK);
+  if(simAir>simNutrient||simWater>simNutrient)return{N:0,P:0,K:0};
   const fluidSim=Math.max(simAir,simWater);
-  const scale=Math.max(0,1-fluidSim);
+  const scale=Math.max(0,1-fluidSim*1.8);
   return{N:Math.round(simN*NPK_MAX.N*scale),P:Math.round(simP*NPK_MAX.P*scale),K:Math.round(simK*NPK_MAX.K*scale)};
 }
 function classifyADC(adc){if(!adc||adc.every(v=>v===0))return null;const scores=Object.fromEntries(Object.entries(REFS).map(([k,ref])=>[k,Math.round(cosineSim(adc,ref)*10000)/100]));const best=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0][0];const diff=Math.max(...Object.values(scores))-Object.values(scores).sort((a,b)=>a-b)[1];const confidence=Math.round(Math.min(99,diff*8));return{best,scores,confidence};}
