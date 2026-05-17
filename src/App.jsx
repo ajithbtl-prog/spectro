@@ -14,7 +14,7 @@ air: [
 ],
 
 // PURE WATER
-water: [con``
+water: [
 2550,1177,2925,1024,1261,1515,
 1574,1584,905,342,218,76,
 1184,400,132,110,244,770
@@ -197,85 +197,60 @@ function computeSmartNPK(adc, refs) {
     return { N:0, P:0, K:0 };
   }
 
-  // similarity score
+  // similarity scores
   const sim = {};
 
   Object.entries(refs).forEach(([k,v])=>{
     sim[k] = cosineSim(adc,v);
   });
 
-  // best matching sample
-  const best = Object
-    .entries(sim)
-    .sort((a,b)=>b[1]-a[1])[0][0];
+  console.log("Similarity:", sim);
 
-  console.log("Detected Sample:", best);
+  // convert to %
+  const nScore = (sim.nitrogen || 0) * 100;
+  const pScore = (sim.phosphorus || 0) * 100;
+  const kScore = (sim.potassium || 0) * 100;
+  const fScore = (sim.fertiliser || 0) * 100;
 
-  // ───────── AIR ─────────
-  if(best === "air"){
+  // dynamic ppm estimation
+  let N = Math.round(
+    (nScore * 4) +
+    (fScore * 1.5)
+  );
 
-    return {
-      N:0,
-      P:0,
-      K:0
-    };
+  let P = Math.round(
+    (pScore * 3) +
+    (fScore * 1.2)
+  );
+
+  let K = Math.round(
+    (kScore * 3.5) +
+    (fScore * 1.3)
+  );
+
+  // AIR suppression
+  if(sim.air > 0.95){
+    N = 0;
+    P = 0;
+    K = 0;
   }
 
-  // ───────── WATER ─────────
-  if(best === "water"){
-
-    return {
-      N:5,
-      P:3,
-      K:4
-    };
+  // WATER suppression
+  if(sim.water > 0.95){
+    N *= 0.1;
+    P *= 0.1;
+    K *= 0.1;
   }
 
-  // ───────── NITROGEN ─────────
-  if(best === "nitrogen"){
+  // clamp
+  N = Math.min(999, Math.max(0,N));
+  P = Math.min(999, Math.max(0,P));
+  K = Math.min(999, Math.max(0,K));
 
-    return {
-      N:400,
-      P:20,
-      K:30
-    };
-  }
-
-  // ───────── PHOSPHORUS ─────────
-  if(best === "phosphorus"){
-
-    return {
-      N:25,
-      P:200,
-      K:40
-    };
-  }
-
-  // ───────── POTASSIUM ─────────
-  if(best === "potassium"){
-
-    return {
-      N:20,
-      P:30,
-      K:300
-    };
-  }
-
-  // ───────── MIXED FERTILIZER ─────────
-  if(best === "fertiliser"){
-
-    return {
-      N:300,
-      P:180,
-      K:250
-    };
-  }
-
-  // fallback
   return {
-    N:0,
-    P:0,
-    K:0
+    N,
+    P,
+    K
   };
 }
 
