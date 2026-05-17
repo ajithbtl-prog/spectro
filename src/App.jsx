@@ -10,11 +10,11 @@ const REFS = {
 air: [
 1089,954,2058,1030,1202,1308,
 1360,1503,933,272,236,75,
-1222,379,142,105,248,853
+1222,379,142,105,248,600
 ],
 
 // PURE WATER
-water: [
+water: [con``
 2550,1177,2925,1024,1261,1515,
 1574,1584,905,342,218,76,
 1184,400,132,110,244,770
@@ -108,12 +108,41 @@ hint:"Potassium spectral characteristics detected."
 // COSINE SIMILARITY
 // ─────────────────────────────────────────────────────────────
 
-function cosineSim(a,b){
-const dot = a.reduce((s,v,i)=>s+v*b[i],0);
-const na  = Math.sqrt(a.reduce((s,v)=>s+v*v,0));
-const nb  = Math.sqrt(b.reduce((s,v)=>s+v*v,0));
+// ─────────────────────────────────────────────────────────────
+// NORMALIZED COSINE SIMILARITY
+// ─────────────────────────────────────────────────────────────
 
-return na===0 || nb===0 ? 0 : dot/(na*nb);
+function normalize(arr){
+
+  const min = Math.min(...arr);
+  const max = Math.max(...arr);
+
+  return arr.map(v =>
+    (v - min) / (max - min + 1e-6)
+  );
+}
+
+function cosineSim(a,b){
+
+  const naArr = normalize(a);
+  const nbArr = normalize(b);
+
+  const dot = naArr.reduce(
+    (s,v,i)=>s+v*nbArr[i],
+    0
+  );
+
+  const na = Math.sqrt(
+    naArr.reduce((s,v)=>s+v*v,0)
+  );
+
+  const nb = Math.sqrt(
+    nbArr.reduce((s,v)=>s+v*v,0)
+  );
+
+  return na===0 || nb===0
+    ? 0
+    : dot/(na*nb);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -147,8 +176,10 @@ const diff = Math.max(...Object.values(scores))
 
 const confidence = Math.round(
 Math.min(99, diff*8)
-);
 
+);
+console.log("Scores:", scores);
+console.log("Detected:", best);
 return {
 best,
 scores,
