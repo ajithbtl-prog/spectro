@@ -155,3 +155,97 @@ scores,
 confidence
 };
 }
+// ─────────────────────────────────────────────────────────────
+// SMART NPK ESTIMATION
+// ─────────────────────────────────────────────────────────────
+
+function computeSmartNPK(adc, refs) {
+
+  // no signal
+  if (!adc || adc.every(v => v === 0)) {
+    return { N:0, P:0, K:0 };
+  }
+
+  // similarity score
+  const sim = {};
+
+  Object.entries(refs).forEach(([k,v])=>{
+    sim[k] = cosineSim(adc,v);
+  });
+
+  // best matching sample
+  const best = Object
+    .entries(sim)
+    .sort((a,b)=>b[1]-a[1])[0][0];
+
+  console.log("Detected Sample:", best);
+
+  // ───────── AIR ─────────
+  if(best === "air"){
+
+    return {
+      N:0,
+      P:0,
+      K:0
+    };
+  }
+
+  // ───────── WATER ─────────
+  if(best === "water"){
+
+    return {
+      N:5,
+      P:3,
+      K:4
+    };
+  }
+
+  // ───────── NITROGEN ─────────
+  if(best === "nitrogen"){
+
+    return {
+      N:400,
+      P:20,
+      K:30
+    };
+  }
+
+  // ───────── PHOSPHORUS ─────────
+  if(best === "phosphorus"){
+
+    return {
+      N:25,
+      P:200,
+      K:40
+    };
+  }
+
+  // ───────── POTASSIUM ─────────
+  if(best === "potassium"){
+
+    return {
+      N:20,
+      P:30,
+      K:300
+    };
+  }
+
+  // ───────── MIXED FERTILIZER ─────────
+  if(best === "fertiliser"){
+
+    return {
+      N:300,
+      P:180,
+      K:250
+    };
+  }
+
+  // fallback
+  return {
+    N:0,
+    P:0,
+    K:0
+  };
+}
+
+
